@@ -14,16 +14,20 @@ type Hitbot struct {
 	Name    string
 	servers []server
 	connID  string
-	token   string
+	auth    auth
 }
 
 type server struct {
 	ServerIP string `json:"server_ip"`
 }
 
+type auth struct {
+	Token string `json:"authToken"`
+}
+
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
-	log.Printf("%v - based on hitbot from Renerte", name)
+	log.Printf("%v - based on hitbot made by Renerte", name)
 	return Hitbot{Name: name}
 }
 
@@ -52,4 +56,24 @@ func (bot *Hitbot) GetID() {
 		}
 	}
 	log.Fatal("Could not get connection IDs!!!")
+}
+
+//Auth attempts to authenticate with Hitbox.tv to get access token, which is needed for chat connection.
+func (bot *Hitbot) Auth(name string, pass string) {
+	temp := "login=" + name + "&pass=" + pass
+	body := strings.NewReader(temp)
+	headers := map[string][]string{"Content-Type": []string{"application/x-www-form-urlencoded"}}
+	_, _, r, err := http.DefaultClient.Post("http://api.hitbox.tv/auth/token", headers, body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if r != nil {
+		defer r.Close()
+	}
+	res := make([]byte, 56)
+	r.Read(res)
+	if err := json.Unmarshal(res, &bot.auth); err != nil {
+		log.Fatalf("Could not parse JSON: %v", err)
+	}
+	log.Print("Successfully authenticated with Hitbox.tv")
 }
