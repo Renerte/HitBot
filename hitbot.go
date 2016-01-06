@@ -11,10 +11,11 @@ import (
 
 //Hitbot struct contains all required fields for a bot.
 type Hitbot struct {
-	Name    string
-	servers []server
-	connID  string
-	auth    auth
+	Name         string
+	servers      []server
+	activeServer int
+	connID       string
+	auth         auth
 }
 
 type server struct {
@@ -51,6 +52,7 @@ func (bot *Hitbot) GetID() {
 		if _, err := http.Get(buf, "http://"+bot.servers[i].ServerIP+"/socket.io/1"); err == nil {
 			temp := strings.Split(buf.String(), ":")
 			bot.connID = temp[0]
+			bot.activeServer = i
 			log.Printf("Connection ID was found properly (%v)", temp[0])
 			return
 		}
@@ -63,7 +65,7 @@ func (bot *Hitbot) Auth(name string, pass string) {
 	temp := "login=" + name + "&pass=" + pass
 	body := strings.NewReader(temp)
 	headers := map[string][]string{"Content-Type": []string{"application/x-www-form-urlencoded"}}
-	_, _, r, err := http.DefaultClient.Post("http://api.hitbox.tv/auth/token", headers, body)
+	st, _, r, err := http.DefaultClient.Post("http://api.hitbox.tv/auth/token", headers, body)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,6 +76,9 @@ func (bot *Hitbot) Auth(name string, pass string) {
 	r.Read(res)
 	if err := json.Unmarshal(res, &bot.auth); err != nil {
 		log.Fatalf("Could not parse JSON: %v", err)
+	}
+	if st.Code != 200 {
+		log.Fatalf("Authentication failed! (status %v)", st.Code)
 	}
 	log.Print("Successfully authenticated with Hitbox.tv")
 }
