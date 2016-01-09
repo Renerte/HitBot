@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/http"
+	"github.com/gorilla/websocket"
 )
 
 //Hitbot struct contains all required fields for a bot.
@@ -15,7 +16,9 @@ type Hitbot struct {
 	servers      []server
 	activeServer int
 	connID       string
+	conn         *websocket.Conn
 	auth         auth
+	channels     []string
 }
 
 type server struct {
@@ -28,8 +31,8 @@ type auth struct {
 
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
-	log.Printf("%v - based on hitbot made by Renerte", name)
-	return Hitbot{Name: name}
+	log.Printf("%v - based on hitbot made by Renerte (github.com/Renerte)", name)
+	return Hitbot{Name: name, activeServer: -1}
 }
 
 //GetServers retrieves list of available servers.
@@ -48,7 +51,7 @@ func (bot *Hitbot) GetServers() {
 //GetID tries to get connection id for the first server available.
 func (bot *Hitbot) GetID() {
 	buf := new(bytes.Buffer)
-	for i := 0; i < len(bot.servers); i++ {
+	for i := bot.activeServer + 1; i < len(bot.servers); i++ {
 		if _, err := http.Get(buf, "http://"+bot.servers[i].ServerIP+"/socket.io/1"); err == nil {
 			temp := strings.Split(buf.String(), ":")
 			bot.connID = temp[0]
@@ -61,8 +64,8 @@ func (bot *Hitbot) GetID() {
 }
 
 //Auth attempts to authenticate with Hitbox.tv to get access token, which is needed for chat connection.
-func (bot *Hitbot) Auth(name string, pass string) {
-	temp := "login=" + name + "&pass=" + pass
+func (bot *Hitbot) Auth(pass string) {
+	temp := "login=" + bot.Name + "&pass=" + pass
 	body := strings.NewReader(temp)
 	headers := map[string][]string{"Content-Type": []string{"application/x-www-form-urlencoded"}}
 	st, _, r, err := http.DefaultClient.Post("http://api.hitbox.tv/auth/token", headers, body)
