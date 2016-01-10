@@ -56,7 +56,7 @@ func (bot *Hitbot) GetID() {
 			temp := strings.Split(buf.String(), ":")
 			bot.connID = temp[0]
 			bot.activeServer = i
-			log.Printf("Connection ID was found properly (%v)", temp[0])
+			log.Print("Connection ID was found properly")
 			return
 		}
 	}

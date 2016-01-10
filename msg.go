@@ -9,23 +9,36 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type outMessage struct {
+	Name string `json:"name"`
+	Args []arg  `json:"args"`
+}
+
+type inMessage struct {
+	Name string   `json:"name"`
+	Args []string `json:"args"`
+}
+
+type arg struct {
+	Method string      `json:"method"`
+	Params interface{} `json:"params"`
+}
+
+type joinChannelParams struct {
+	Channel string `json:"channel"`
+	Name    string `json:"name"`
+	Token   string `json:"token"`
+	IsAdmin bool   `json:"isAdmin"`
+}
+
 //JoinChannel joins channel specified in the parameter.
 func (bot *Hitbot) JoinChannel(channel string) {
-	message := map[string]interface{}{
-		"name": "message",
-		"args": []map[string]interface{}{
-			{
-				"method": "joinChannel",
-				"params": map[string]interface{}{
-					"channel": channel,
-					"name":    bot.Name,
-					"token":   bot.auth.Token,
-					"isAdmin": false}}}}
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: channel, Name: bot.Name, Token: bot.auth.Token, IsAdmin: false}}}}
 	var js []byte
-	js, _ = json.Marshal(message)
+	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
 	bot.conn.WriteMessage(websocket.TextMessage, []byte(msg))
-	log.Print("Login sent!")
+	log.Print("Attempted login...")
 }
 
 //MessageHandler processes messages recieved from chat server.
@@ -44,6 +57,8 @@ func (bot *Hitbot) MessageHandler() {
 			log.Print("Server confirmed connection \\o/")
 			bot.JoinChannel(bot.channels[0])
 			continue
+		} else if string(p[:4]) == "5:::" {
+			bot.parseMessage(p[4:])
 		}
 	}
 }
@@ -57,4 +72,21 @@ func (bot *Hitbot) Connect(channels ...string) {
 	}
 	bot.conn = c
 	bot.channels = channels
+}
+
+func (bot *Hitbot) parseMessage(msg []byte) {
+	var in inMessage
+	if err := json.Unmarshal(msg, &in); err != nil {
+		log.Fatalf("Could not parse message: %v", err)
+	}
+	var inArgs arg
+	if err := json.Unmarshal([]byte(in.Args[0]), &inArgs); err != nil {
+		log.Fatalf("Could not parse args: %v", err)
+	}
+	if inArgs.Method == "chatMsg" {
+		log.Printf("%v: %v", inArgs.Params.(map[string]interface{})["name"].(string), inArgs.Params.(map[string]interface{})["text"].(string))
+	} else if inArgs.Method == "loginMsg" {
+		log.Print("Login successful!")
+	}
+	//log.Printf("Debug msg out: %v", string(msg))
 }
