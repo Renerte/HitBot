@@ -3,4 +3,4 @@
 
 Simple library for easy bot creation for Hitbox.tv streaming platform.
 
-> Keep in mind, this is **not complete API!** Right now, it connects to chat, but is only capable of joining a channel and outputting chat to log.
+> Keep in mind, this is **not complete API!** Right now, it reacts to commands, but only by log, **it does not output chat messages yet**.
