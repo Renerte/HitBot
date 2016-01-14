@@ -1,10 +1,9 @@
 package hitbot
 
-// imports
-
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"github.com/gorilla/websocket"
 )
@@ -33,7 +32,7 @@ type joinChannelParams struct {
 
 //JoinChannel joins channel specified in the parameter.
 func (bot *Hitbot) JoinChannel(channel string) {
-	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: channel, Name: bot.Name, Token: bot.auth.Token, IsAdmin: false}}}}
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: strings.ToLower(channel), Name: bot.Name, Token: bot.auth.Token, IsAdmin: false}}}}
 	var js []byte
 	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
@@ -83,8 +82,9 @@ func (bot *Hitbot) parseMessage(msg []byte) {
 	if err := json.Unmarshal([]byte(in.Args[0]), &inArgs); err != nil {
 		log.Fatalf("Could not parse args: %v", err)
 	}
-	if inArgs.Method == "chatMsg" {
-		log.Printf("%v: %v", inArgs.Params.(map[string]interface{})["name"].(string), inArgs.Params.(map[string]interface{})["text"].(string))
+	if inArgs.Method == "chatMsg" && inArgs.Params.(map[string]interface{})["text"].(string)[0] == '!' && inArgs.Params.(map[string]interface{})["buffer"] == nil {
+		//log.Printf("%v: %v", inArgs.Params.(map[string]interface{})["name"].(string), inArgs.Params.(map[string]interface{})["text"].(string))
+		bot.dispatchCommand(inArgs.Params.(map[string]interface{}))
 	} else if inArgs.Method == "loginMsg" {
 		log.Print("Login successful!")
 	}
