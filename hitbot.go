@@ -20,6 +20,7 @@ type Hitbot struct {
 	auth         auth
 	channels     []string
 	cmdHandlers  map[string]func(map[string]interface{}) (string, string)
+	color        string
 }
 
 type server struct {
@@ -33,7 +34,7 @@ type auth struct {
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
 	log.Printf("%v - based on hitbot made by Renerte (github.com/Renerte)", name)
-	return Hitbot{Name: name, activeServer: -1, cmdHandlers: make(map[string]func(map[string]interface{}) (string, string))}
+	return Hitbot{Name: name, activeServer: -1, cmdHandlers: make(map[string]func(map[string]interface{}) (string, string)), color: "ffffff"}
 }
 
 //GetServers retrieves list of available servers.
@@ -85,4 +86,9 @@ func (bot *Hitbot) Auth(pass string) {
 		log.Fatalf("Authentication failed! (status %v)", st.Code)
 	}
 	log.Print("Successfully authenticated with Hitbox.tv")
+}
+
+//NameColor sets color for bot name. (hex value without `#`)
+func (bot *Hitbot) NameColor(color string) {
+	bot.color = color
 }

@@ -48,7 +48,7 @@ func (bot *Hitbot) JoinChannel(channel string) {
 }
 
 func (bot *Hitbot) sendMessage(channel string, text string) {
-	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: chatParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: "aa00aa", Text: text}}}}
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: chatParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: bot.color, Text: text}}}}
 	var js []byte
 	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
