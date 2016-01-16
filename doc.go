@@ -27,6 +27,9 @@ Where `handler` is:
         //returns channel and response text
     }
 
+If you don't want your bot's name to be white, you can set color with:
+    bot.NameColor("hex value without `#`")
+
 Then you can finally connect, and start MessageHandler:
     bot.Connect("channel")
     bot.MessageHandler()
