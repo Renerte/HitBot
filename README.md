@@ -3,4 +3,4 @@
 
 Simple library for easy bot creation for Hitbox.tv streaming platform.
 
-> Keep in mind, this is **not complete API!** Right now, it reacts to commands, but only by log, **it does not output chat messages yet**.
+> Keep in mind, this is **semi complete API!** Right now, it reacts to commands by outputting chat messages, yet it still doesn't recognize user roles.
