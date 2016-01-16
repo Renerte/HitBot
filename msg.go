@@ -30,6 +30,13 @@ type joinChannelParams struct {
 	IsAdmin bool   `json:"isAdmin"`
 }
 
+type chatParams struct {
+	Channel   string `json:"channel"`
+	Name      string `json:"name"`
+	NameColor string `json:"nameColor"`
+	Text      string `json:"text"`
+}
+
 //JoinChannel joins channel specified in the parameter.
 func (bot *Hitbot) JoinChannel(channel string) {
 	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: strings.ToLower(channel), Name: bot.Name, Token: bot.auth.Token, IsAdmin: false}}}}
@@ -38,6 +45,14 @@ func (bot *Hitbot) JoinChannel(channel string) {
 	msg := "5:::" + string(js)
 	bot.conn.WriteMessage(websocket.TextMessage, []byte(msg))
 	log.Print("Attempted login...")
+}
+
+func (bot *Hitbot) sendMessage(channel string, text string) {
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: chatParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: "aa00aa", Text: text}}}}
+	var js []byte
+	js, _ = json.Marshal(msgs)
+	msg := "5:::" + string(js)
+	bot.conn.WriteMessage(websocket.TextMessage, []byte(msg))
 }
 
 //MessageHandler processes messages recieved from chat server.

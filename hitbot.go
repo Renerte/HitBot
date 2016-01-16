@@ -19,7 +19,7 @@ type Hitbot struct {
 	conn         *websocket.Conn
 	auth         auth
 	channels     []string
-	cmdHandlers  map[string]CmdHandler
+	cmdHandlers  map[string]func(map[string]interface{}) (string, string)
 }
 
 type server struct {
@@ -33,7 +33,7 @@ type auth struct {
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
 	log.Printf("%v - based on hitbot made by Renerte (github.com/Renerte)", name)
-	return Hitbot{Name: name, activeServer: -1, cmdHandlers: make(map[string]CmdHandler)}
+	return Hitbot{Name: name, activeServer: -1, cmdHandlers: make(map[string]func(map[string]interface{}) (string, string))}
 }
 
 //GetServers retrieves list of available servers.
