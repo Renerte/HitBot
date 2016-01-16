@@ -69,7 +69,9 @@ func (bot *Hitbot) MessageHandler() {
 			continue
 		} else if string(p[:3]) == "1::" {
 			log.Print("Server confirmed connection \\o/")
-			bot.JoinChannel(bot.channels[0])
+			for _, channel := range bot.channels {
+				bot.JoinChannel(channel)
+			}
 			continue
 		} else if string(p[:4]) == "5:::" {
 			bot.parseMessage(p[4:])

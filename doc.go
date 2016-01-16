@@ -17,8 +17,15 @@ After that you need to get connection id for one of the servers:
 Before you can connect, you have to login to Hitbox.tv for access token. Following command does it for you:
     bot.Auth("pass")
 
-At any point you can register commands by using provided BasicCmd handler, or create your own. To create basic cmd response:
-    bot.RegisterHandler("cmdname", hitbot.GetBasicCmd("response"))
+At any point you can register commands by using provided BasicCmd handler factory, or create your own. To create basic cmd response:
+    hitbot.BasicCmd("response")
+
+For custom handlers use:
+    bot.RegisterHandler("cmdname", handler)
+Where `handler` is:
+    func handler(params map[string]interface{}) (string, string){
+        //returns channel and response text
+    }
 
 Then you can finally connect, and start MessageHandler:
     bot.Connect("channel")
