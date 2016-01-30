@@ -18,7 +18,7 @@ Before you can connect, you have to login to Hitbox.tv for access token. Followi
     bot.Auth("pass")
 
 At any point you can register commands by using provided BasicCmd handler factory, or create your own. To create basic cmd response:
-    hitbot.BasicCmd("response")
+    bot.BasicCmd("response")
 
 For custom handlers use:
     bot.RegisterHandler("cmdname", handler)
