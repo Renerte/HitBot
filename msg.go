@@ -65,7 +65,7 @@ func (bot *Hitbot) MessageHandler() {
 		//log.Printf("Message: %v", string(p)) //debug info
 		if string(p[:3]) == "2::" {
 			bot.conn.WriteMessage(websocket.TextMessage, []byte("2::"))
-			log.Print("Ping!")
+			//log.Print("Ping!")
 			continue
 		} else if string(p[:3]) == "1::" {
 			log.Print("Server confirmed connection \\o/")

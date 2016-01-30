@@ -5,8 +5,11 @@ import (
 	"strings"
 )
 
+//CmdHandler is a type of function capable of handling commands.
+type CmdHandler func(map[string]interface{}) (string, string)
+
 //RegisterHandler registers specified handler for command of provided name. Will overwrite if command already exists.
-func (bot *Hitbot) RegisterHandler(name string, handler func(map[string]interface{}) (string, string)) {
+func (bot *Hitbot) RegisterHandler(name string, handler CmdHandler) {
 	bot.cmdHandlers[name] = handler
 	log.Printf("Registered '%v' command", name)
 }
