@@ -10,8 +10,14 @@ type CmdHandler func(ChatParams) (string, string)
 
 //RegisterHandler registers specified handler for command of provided name. Will overwrite if command already exists.
 func (bot *Hitbot) RegisterHandler(name string, handler CmdHandler) {
+	bot.registerHandler(name, handler)
+	if bot.verbose {
+		log.Printf("Registered %v command", name)
+	}
+}
+
+func (bot *Hitbot) registerHandler(name string, handler CmdHandler) {
 	bot.cmdHandlers[name] = handler
-	log.Printf("Registered '%v' command", name)
 }
 
 type basicCmd struct {
@@ -29,7 +35,6 @@ func (bot *Hitbot) BasicCmd(name string, response string) {
 
 func (bot *Hitbot) dispatchCommand(params ChatParams) {
 	cmd := strings.Split(params.Text, " ")
-	//log.Printf("%v invoked command '%v'", params["name"].(string), cmd[0][1:]) //debug stuff
 	if handler, prs := bot.cmdHandlers[cmd[0][1:]]; prs {
 		bot.sendMessage(handler(params))
 	}

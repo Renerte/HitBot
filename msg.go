@@ -28,6 +28,7 @@ type chatArg struct {
 	Params ChatParams `json:"params"`
 }
 
+//ChatParams is a struct of params provided for chat messages.
 type ChatParams struct {
 	Channel      string `json:"channel"`
 	Name         string `json:"name"`
@@ -62,16 +63,22 @@ type msgParams struct {
 
 //JoinChannel joins channel specified in the parameter.
 func (bot *Hitbot) JoinChannel(channel string) {
-	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: strings.ToLower(channel), Name: bot.Name, Token: bot.auth.Token, IsAdmin: false}}}}
+	bot.joinChannel(channel)
+	if bot.verbose {
+		log.Printf("Attempted login to \"%v\"...", channel)
+	}
+}
+
+func (bot *Hitbot) joinChannel(channel string) {
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "joinChannel", Params: joinChannelParams{Channel: strings.ToLower(channel), Name: bot.name, Token: bot.auth.Token, IsAdmin: false}}}}
 	var js []byte
 	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
 	bot.conn.WriteMessage(websocket.TextMessage, []byte(msg))
-	log.Print("Attempted login...")
 }
 
 func (bot *Hitbot) sendMessage(channel string, text string) {
-	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: msgParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: bot.color, Text: text}}}}
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: msgParams{Channel: strings.ToLower(channel), Name: bot.name, NameColor: bot.color, Text: text}}}}
 	var js []byte
 	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
@@ -91,9 +98,9 @@ func (bot *Hitbot) MessageHandler() {
 			//log.Print("Ping!")
 			continue
 		} else if string(p[:3]) == "1::" {
-			log.Print("Server confirmed connection \\o/")
+			log.Print("Connection successful!")
 			for _, channel := range bot.channels {
-				bot.JoinChannel(channel)
+				bot.joinChannel(channel)
 			}
 			continue
 		} else if string(p[:4]) == "5:::" {

@@ -12,7 +12,7 @@ import (
 
 //Hitbot struct contains all required fields for a bot.
 type Hitbot struct {
-	Name         string
+	name         string
 	servers      []server
 	activeServer int
 	connID       string
@@ -21,6 +21,7 @@ type Hitbot struct {
 	channels     []string
 	cmdHandlers  map[string]CmdHandler
 	color        string
+	verbose      bool
 }
 
 type server struct {
@@ -31,10 +32,21 @@ type auth struct {
 	Token string `json:"authToken"`
 }
 
+//Start provides a quick way to make the bot ready for connecting.
+func (bot *Hitbot) Start() {
+	bot.GetServers()
+	bot.GetID()
+}
+
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
 	log.Printf("%v - based on hitbot made by Renerte (github.com/Renerte)", name)
-	return Hitbot{Name: name, activeServer: -1, cmdHandlers: make(map[string]CmdHandler), color: "ffffff"}
+	return Hitbot{name: name, activeServer: -1, cmdHandlers: make(map[string]CmdHandler), color: "ffffff"}
+}
+
+//Verbose sets its flag on the bot, controlling amount of outputted information.
+func (bot *Hitbot) Verbose(verbose bool) {
+	bot.verbose = verbose
 }
 
 //GetServers retrieves list of available servers.
@@ -47,7 +59,9 @@ func (bot *Hitbot) GetServers() {
 	if err := json.Unmarshal(buf.Bytes(), &bot.servers); err != nil {
 		log.Fatalf("Could not parse JSON: %v", err)
 	}
-	log.Printf("Found %v servers", len(bot.servers))
+	if bot.verbose {
+		log.Printf("Found %v servers", len(bot.servers))
+	}
 }
 
 //GetID tries to get connection id for the first server available.
@@ -58,7 +72,9 @@ func (bot *Hitbot) GetID() {
 			temp := strings.Split(buf.String(), ":")
 			bot.connID = temp[0]
 			bot.activeServer = i
-			log.Print("Connection ID was found properly")
+			if bot.verbose {
+				log.Print("Connection ID was found properly")
+			}
 			return
 		}
 	}
@@ -67,7 +83,7 @@ func (bot *Hitbot) GetID() {
 
 //Auth attempts to authenticate with Hitbox.tv to get access token, which is needed for chat connection.
 func (bot *Hitbot) Auth(pass string) {
-	temp := "login=" + bot.Name + "&pass=" + pass
+	temp := "login=" + bot.name + "&pass=" + pass
 	body := strings.NewReader(temp)
 	headers := map[string][]string{"Content-Type": []string{"application/x-www-form-urlencoded"}}
 	st, _, r, err := http.DefaultClient.Post("http://api.hitbox.tv/auth/token", headers, body)
