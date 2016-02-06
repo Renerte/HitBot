@@ -23,6 +23,29 @@ type arg struct {
 	Params interface{} `json:"params"`
 }
 
+type chatArg struct {
+	Method string     `json:"method"`
+	Params ChatParams `json:"params"`
+}
+
+type ChatParams struct {
+	Channel      string `json:"channel"`
+	Name         string `json:"name"`
+	NameColor    string `json:"nameColor"`
+	Text         string `json:"text"`
+	Time         int    `json:"time"`
+	Role         string `json:"role"`
+	IsFollower   bool   `json:"isFollower"`
+	IsSubscriber bool   `json:"isSubscriber"`
+	IsOwner      bool   `json:"isOwner"`
+	IsStaff      bool   `json:"isStaff"`
+	IsCommunity  bool   `json:"isCommunity"`
+	Media        bool   `json:"media"`
+	Image        string `json:"image"`
+	Buffer       bool   `json:"buffer"`
+	BufferSent   bool   `json:"buffersent"`
+}
+
 type joinChannelParams struct {
 	Channel string `json:"channel"`
 	Name    string `json:"name"`
@@ -30,7 +53,7 @@ type joinChannelParams struct {
 	IsAdmin bool   `json:"isAdmin"`
 }
 
-type chatParams struct {
+type msgParams struct {
 	Channel   string `json:"channel"`
 	Name      string `json:"name"`
 	NameColor string `json:"nameColor"`
@@ -48,7 +71,7 @@ func (bot *Hitbot) JoinChannel(channel string) {
 }
 
 func (bot *Hitbot) sendMessage(channel string, text string) {
-	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: chatParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: bot.color, Text: text}}}}
+	msgs := outMessage{Name: "message", Args: []arg{{Method: "chatMsg", Params: msgParams{Channel: strings.ToLower(channel), Name: bot.Name, NameColor: bot.color, Text: text}}}}
 	var js []byte
 	js, _ = json.Marshal(msgs)
 	msg := "5:::" + string(js)
@@ -95,13 +118,13 @@ func (bot *Hitbot) parseMessage(msg []byte) {
 	if err := json.Unmarshal(msg, &in); err != nil {
 		log.Fatalf("Could not parse message: %v", err)
 	}
-	var inArgs arg
+	var inArgs chatArg
 	if err := json.Unmarshal([]byte(in.Args[0]), &inArgs); err != nil {
 		log.Fatalf("Could not parse args: %v", err)
 	}
-	if inArgs.Method == "chatMsg" && inArgs.Params.(map[string]interface{})["text"].(string)[0] == '!' && inArgs.Params.(map[string]interface{})["buffer"] == nil {
+	if inArgs.Method == "chatMsg" && inArgs.Params.Text[0] == '!' && !inArgs.Params.Buffer {
 		//log.Printf("%v: %v", inArgs.Params.(map[string]interface{})["name"].(string), inArgs.Params.(map[string]interface{})["text"].(string))
-		bot.dispatchCommand(inArgs.Params.(map[string]interface{}))
+		bot.dispatchCommand(inArgs.Params)
 	} else if inArgs.Method == "loginMsg" {
 		log.Print("Login successful!")
 	}
