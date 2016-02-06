@@ -23,8 +23,8 @@ At any point you can register commands by using provided BasicCmd handler factor
 For custom handlers use:
     bot.RegisterHandler("cmdname", handler)
 Where `handler` is:
-    func handler(params map[string]interface{}) (string, string){
-        //returns channel and response text
+    func handler(params hitbot.ChatParams) (string, string){
+        return params.Channel, "response"
     }
 
 If you don't want your bot's name to be white, you can set color with:
