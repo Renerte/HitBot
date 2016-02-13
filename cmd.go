@@ -12,7 +12,7 @@ type CmdHandler func(ChatParams) (string, string)
 func (bot *Hitbot) RegisterHandler(name string, handler CmdHandler) {
 	bot.registerHandler(name, handler)
 	if bot.verbose {
-		log.Printf("Registered %v command", name)
+		log.Printf("Registered %v handler", name)
 	}
 }
 
