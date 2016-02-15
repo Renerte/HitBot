@@ -46,7 +46,7 @@ func LoadBot(path string, verbose bool) Hitbot {
 	bot.GetServers()
 	bot.GetID()
 	bot.Auth(c.Pass)
-	bot.RegisterHandler("basic", basicInit)
+	bot.RegisterBuiltinHandlers()
 	channels := make([]string, 64)
 	for _, channel := range c.Channels {
 		channels = append(channels, channel.Name)
@@ -57,6 +57,11 @@ func LoadBot(path string, verbose bool) Hitbot {
 	bot.Connect(channels...)
 	bot.NameColor(c.NameColor)
 	return bot
+}
+
+//RegisterBuiltinHandlers registers all builtin handlers in bot instance for commands to use.
+func (bot *Hitbot) RegisterBuiltinHandlers() {
+	bot.RegisterHandler("basic", basicInit)
 }
 
 //LoadCommands loads commands from map created by either LoadBot, or RegisterCommand functions.
