@@ -41,15 +41,27 @@ func LoadBot(path string, verbose bool) Hitbot {
 	if err := json.Unmarshal(raw.Bytes(), &c); err != nil {
 		log.Fatalf("Fatal error while processing config: %v", err)
 	}
-	bot := Hitbot{name: c.Name, verbose: verbose}
+	bot := NewBot(c.Name)
+	bot.Verbose(verbose)
 	bot.GetServers()
 	bot.GetID()
 	bot.Auth(c.Pass)
+	bot.RegisterHandler("basic", basicInit)
 	channels := make([]string, 64)
 	for _, channel := range c.Channels {
 		channels = append(channels, channel.Name)
+		for _, comm := range channel.Commands {
+			bot.cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Data: comm.Data}
+		}
 	}
 	bot.Connect(channels...)
 	bot.NameColor(c.NameColor)
 	return bot
+}
+
+//LoadCommands loads commands from map created by either LoadBot, or RegisterCommand functions.
+func (bot *Hitbot) LoadCommands() {
+	for name, cmd := range bot.cmdHandlers {
+		bot.cmds[name] = bot.handlers[cmd.Handler](cmd.Data)
+	}
 }
