@@ -19,6 +19,7 @@ type Hitbot struct {
 	conn         *websocket.Conn
 	auth         auth
 	channels     []string
+	chCmds       map[string]chCmd
 	cmds         map[string]HandlerFunc
 	cmdHandlers  map[string]cmd
 	handlers     map[string]HandlerInit
@@ -32,6 +33,11 @@ type cmd struct {
 	Data    HandlerData
 }
 
+type chCmd struct {
+	cmds        map[string]HandlerFunc
+	cmdHandlers map[string]cmd
+}
+
 type server struct {
 	ServerIP string `json:"server_ip"`
 }
@@ -40,16 +46,10 @@ type auth struct {
 	Token string `json:"authToken"`
 }
 
-//Start provides a quick way to make the bot ready for connecting.
-func (bot *Hitbot) Start() {
-	bot.GetServers()
-	bot.GetID()
-}
-
 //NewBot creates bot with specified name.
 func NewBot(name string) Hitbot {
 	log.Printf("%v - based on hitbot made by Renerte (github.com/Renerte)", name)
-	return Hitbot{name: name, activeServer: -1, handlers: make(map[string]HandlerInit), cmds: make(map[string]HandlerFunc), cmdHandlers: make(map[string]cmd), color: "ffffff"}
+	return Hitbot{name: name, activeServer: -1, handlers: make(map[string]HandlerInit), chCmds: make(map[string]chCmd), cmds: make(map[string]HandlerFunc), cmdHandlers: make(map[string]cmd), color: "ffffff"}
 }
 
 //Verbose sets its flag on the bot, controlling amount of outputted information.

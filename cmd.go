@@ -39,18 +39,6 @@ func (bot *Hitbot) registerCommand(name string, handler string, role string, dat
 	bot.cmds[name] = bot.handlers[handler](data)
 }
 
-type basicCmd struct {
-	response string
-}
-
-func (cmd basicCmd) Handle(params ChatParams) (string, string) {
-	return params.Channel, cmd.response
-}
-
-func basicInit(data HandlerData) HandlerFunc {
-	return basicCmd{response: data.(string)}.Handle
-}
-
 //BasicCmd creates and registers basic cmd handler.
 func (bot *Hitbot) BasicCmd(name string, role string, response string) {
 	bot.RegisterCommand(name, "basic", role, response)
@@ -63,6 +51,9 @@ func (bot *Hitbot) dispatchCommand(params ChatParams) {
 		"user":  1,
 		"admin": 2}
 	if handler, prs := bot.cmds[cmd[0][1:]]; prs && userRoles[bot.cmdHandlers[cmd[0][1:]].Role] <= userRoles[params.Role] {
+		bot.sendMessage(handler(params))
+	}
+	if handler, prs := bot.chCmds[params.Channel].cmds[cmd[0][1:]]; prs && userRoles[bot.chCmds[params.Channel].cmdHandlers[cmd[0][1:]].Role] <= userRoles[params.Role] {
 		bot.sendMessage(handler(params))
 	}
 }

@@ -12,6 +12,7 @@ type config struct {
 	Pass      string    `json:"pass"`
 	NameColor string    `json:"nameColor"`
 	Channels  []channel `json:"channels"`
+	Commands  []command `json:"commands"`
 }
 
 type channel struct {
@@ -50,9 +51,13 @@ func LoadBot(path string, verbose bool) Hitbot {
 	channels := make([]string, 64)
 	for _, channel := range c.Channels {
 		channels = append(channels, channel.Name)
+		bot.chCmds[channel.Name] = chCmd{cmds: make(map[string]HandlerFunc), cmdHandlers: make(map[string]cmd)}
 		for _, comm := range channel.Commands {
-			bot.cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Role: comm.Role, Data: comm.Data}
+			bot.chCmds[channel.Name].cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Role: comm.Role, Data: comm.Data}
 		}
+	}
+	for _, comm := range c.Commands {
+		bot.cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Role: comm.Role, Data: comm.Data}
 	}
 	bot.Connect(channels...)
 	bot.NameColor(c.NameColor)
@@ -71,5 +76,10 @@ func (bot *Hitbot) RegisterBuiltinHandlers() {
 func (bot *Hitbot) LoadCommands() {
 	for name, cmd := range bot.cmdHandlers {
 		bot.cmds[name] = bot.handlers[cmd.Handler](cmd.Data)
+	}
+	for _, ch := range bot.chCmds {
+		for name, cmd := range ch.cmdHandlers {
+			ch.cmds[name] = bot.handlers[cmd.Handler](cmd.Data)
+		}
 	}
 }
