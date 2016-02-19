@@ -27,15 +27,15 @@ func (bot *Hitbot) registerHandler(name string, handler HandlerInit) {
 }
 
 //RegisterCommand registers command with specified name, handler, and data.
-func (bot *Hitbot) RegisterCommand(name string, handler string, data HandlerData) {
-	bot.registerCommand(name, handler, data)
+func (bot *Hitbot) RegisterCommand(name string, handler string, role string, data HandlerData) {
+	bot.registerCommand(name, handler, role, data)
 	if bot.verbose {
 		log.Printf("Registered '%v' command with handler '%v'", name, handler)
 	}
 }
 
-func (bot *Hitbot) registerCommand(name string, handler string, data HandlerData) {
-	bot.cmdHandlers[name] = cmd{Handler: handler, Data: data}
+func (bot *Hitbot) registerCommand(name string, handler string, role string, data HandlerData) {
+	bot.cmdHandlers[name] = cmd{Handler: handler, Role: role, Data: data}
 	bot.cmds[name] = bot.handlers[handler](data)
 }
 
@@ -52,13 +52,17 @@ func basicInit(data HandlerData) HandlerFunc {
 }
 
 //BasicCmd creates and registers basic cmd handler.
-func (bot *Hitbot) BasicCmd(name string, response string) {
-	bot.RegisterCommand(name, "basic", response)
+func (bot *Hitbot) BasicCmd(name string, role string, response string) {
+	bot.RegisterCommand(name, "basic", role, response)
 }
 
 func (bot *Hitbot) dispatchCommand(params ChatParams) {
 	cmd := strings.Split(params.Text, " ")
-	if handler, prs := bot.cmds[cmd[0][1:]]; prs {
+	userRoles := map[string]byte{
+		"anon":  0,
+		"user":  1,
+		"admin": 2}
+	if handler, prs := bot.cmds[cmd[0][1:]]; prs && userRoles[bot.cmdHandlers[cmd[0][1:]].Role] <= userRoles[params.Role] {
 		bot.sendMessage(handler(params))
 	}
 }

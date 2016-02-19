@@ -51,7 +51,7 @@ func LoadBot(path string, verbose bool) Hitbot {
 	for _, channel := range c.Channels {
 		channels = append(channels, channel.Name)
 		for _, comm := range channel.Commands {
-			bot.cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Data: comm.Data}
+			bot.cmdHandlers[comm.Name] = cmd{Handler: comm.Handler, Role: comm.Role, Data: comm.Data}
 		}
 	}
 	bot.Connect(channels...)
@@ -61,7 +61,10 @@ func LoadBot(path string, verbose bool) Hitbot {
 
 //RegisterBuiltinHandlers registers all builtin handlers in bot instance for commands to use.
 func (bot *Hitbot) RegisterBuiltinHandlers() {
-	bot.RegisterHandler("basic", basicInit)
+	bot.registerHandler("basic", basicInit)
+	if bot.verbose {
+		log.Print("Registered builtin handlers")
+	}
 }
 
 //LoadCommands loads commands from map created by either LoadBot, or RegisterCommand functions.

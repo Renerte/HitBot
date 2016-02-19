@@ -28,6 +28,7 @@ type Hitbot struct {
 
 type cmd struct {
 	Handler string
+	Role    string
 	Data    HandlerData
 }
 
