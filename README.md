@@ -1,5 +1,5 @@
 # HitBot
-[![GoDoc](https://godoc.org/github.com/Renerte/hitbot?status.svg)](https://godoc.org/github.com/Renerte/hitbot) [![Test Coverage](https://codeclimate.com/github/Renerte/hitbot/badges/coverage.svg)](https://codeclimate.com/github/Renerte/hitbot/coverage)
+[![GoDoc](https://godoc.org/github.com/Renerte/hitbot?status.svg)](https://godoc.org/github.com/Renerte/hitbot)
 
 Simple library for easy bot creation for Hitbox.tv streaming platform.
 
